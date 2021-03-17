@@ -54,9 +54,6 @@ SeismicData::SeismicData(QString Path)
 
 }
 
-void SeismicData::process_block(){
-
-}
 
 int SeismicData::segy_get_size(){
     return numtrh;
@@ -193,9 +190,220 @@ QMap<QString,int> SeismicData::get_trace_by_id(int id){
 }
 
 
-//QMultiMap<QString,int> segy_get_otg(Segio_trace_info seg_inf){
-//    QMultiMap<QString,int> map;
 
-//    qDebug()<< seg_inf.x_line[0];
+void SeismicData::read_trace(float* trbuf,int tr_num,int loc_tr_num,
+                             int* source_x,
+                             int* source_y,
+                             int* CDP_x,
+                             int* CDP_y,
+                             int* yline,
+                             int* xline,
+                             int* group_x,
+                             int* group_y,
+                             int* shot_point,
+                             int* offset,
+                             int* trace_id,
+                             int* in_line,
+                             int* x_line){
 
-//}
+    char traceh[SEGY_TRACE_HEADER_SIZE];
+    //std::cout << "loc_tr_num" << loc_tr_num << std::endl;
+
+
+    int err = segy_traceheader(fp, tr_num, traceh, trace0, trace_bsize);
+    if (err != 0) {
+        QMessageBox msgBox;
+        msgBox.setText("Unable to read trace %d\n" + tr_num);
+        msgBox.exec();
+        std::exit(err);
+    }
+
+    int sample_count;
+    err = segy_get_field(traceh, SEGY_TR_SAMPLE_COUNT, &sample_count);
+
+    if (err != 0) {
+        QMessageBox msgBox;
+        msgBox.setText("Invalid trace header field: %d\n" + SEGY_TR_SAMPLE_COUNT);
+        msgBox.exec();
+        std::exit(err);
+    }
+
+    if (sample_count != samnr) {
+        QMessageBox msgBox;
+        msgBox.setText("Only fixed size traces are supperted\n");
+        msgBox.exec();
+        std::exit(1);
+    }
+
+    err = segy_get_field(traceh, SEGY_TR_SOURCE_X, &source_x[loc_tr_num]);
+
+    if (err != 0) {
+        QMessageBox msgBox;
+        msgBox.setText("Invalid trace header field: %d\n" + SEGY_TR_SOURCE_X);
+        msgBox.exec();
+        std::exit(err);
+    }
+
+    err = segy_get_field(traceh, SEGY_TR_SOURCE_Y, &source_y[loc_tr_num]);
+
+    if (err != 0) {
+        QMessageBox msgBox;
+        msgBox.setText("Invalid trace header field: %d\n"+SEGY_TR_SOURCE_Y);
+        msgBox.exec();
+        std::exit(err);
+    }
+
+
+    err = segy_get_field(traceh, SEGY_TR_CROSSLINE, &xline[loc_tr_num]);
+
+    if (err != 0) {
+        QMessageBox msgBox;
+        msgBox.setText("Invalid trace header field: %d\n"+SEGY_TR_CROSSLINE);
+        msgBox.exec();
+        std::exit(err);
+    }
+
+    err = segy_get_field(traceh, SEGY_TR_INLINE, &yline[loc_tr_num]);
+
+    if (err != 0) {
+        QMessageBox msgBox;
+        msgBox.setText("Invalid trace header field: %d\n"+SEGY_TR_INLINE);
+        msgBox.exec();
+        std::exit(err);
+    }
+
+
+    err = segy_get_field(traceh, SEGY_TR_CDP_X, &CDP_x[loc_tr_num]);
+
+    if (err != 0) {
+        QMessageBox msgBox;
+        msgBox.setText("Invalid trace header field: %d\n"+SEGY_TR_CDP_X);
+        msgBox.exec();
+        std::exit(err);
+    }
+
+    err = segy_get_field(traceh, SEGY_TR_CDP_Y, &CDP_y[loc_tr_num]);
+
+    if (err != 0) {
+        QMessageBox msgBox;
+        msgBox.setText("Invalid trace header field: %d\n"+SEGY_TR_CDP_Y);
+        msgBox.exec();
+        std::exit(err);
+    }
+
+
+    err = segy_get_field(traceh, SEGY_TR_GROUP_X, &group_x[loc_tr_num]);
+
+    if (err != 0) {
+        QMessageBox msgBox;
+        msgBox.setText("Invalid trace header field: %d\n"+SEGY_TR_GROUP_X);
+        msgBox.exec();
+        std::exit(err);
+    }
+
+    err = segy_get_field(traceh, SEGY_TR_GROUP_Y, &group_y[loc_tr_num]);
+
+    if (err != 0) {
+        QMessageBox msgBox;
+        msgBox.setText("Invalid trace header field: %d\n"+SEGY_TR_GROUP_Y);
+        msgBox.exec();
+        std::exit(err);
+    }
+
+    err = segy_get_field(traceh, SEGY_TR_SHOT_POINT, &shot_point[loc_tr_num]);
+
+    if (err != 0) {
+        QMessageBox msgBox;
+        msgBox.setText("Invalid trace header field: %d\n"+SEGY_TR_SHOT_POINT);
+        msgBox.exec();
+        std::exit(err);
+    }
+
+    err = segy_get_field(traceh, SEGY_TR_OFFSET, &offset[loc_tr_num]);
+
+    if (err != 0) {
+        QMessageBox msgBox;
+        msgBox.setText("Invalid trace header field: %d\n"+SEGY_TR_OFFSET);
+        msgBox.exec();
+        std::exit(err);
+    }
+
+    err = segy_get_field(traceh, SEGY_TR_SEQ_FILE, &trace_id[loc_tr_num]);
+
+    if (err != 0) {
+        QMessageBox msgBox;
+        msgBox.setText("Invalid trace header field: %d\n"+SEGY_TR_SEQ_FILE);
+        msgBox.exec();
+        std::exit(err);
+    }
+
+    err = segy_readtrace(fp, tr_num, trbuf, trace0, trace_bsize);
+    segy_to_native(format, samnr, trbuf);
+    if (err!= 0){
+        QMessageBox msgBox;
+        msgBox.setText("trace read error: %d\n"+err);
+        msgBox.exec();
+    }
+}
+
+void SeismicData::process_block(float* trbuf,int tr_count,int start,
+                                int* source_x,
+                                int* source_y,
+                                int* CDP_x,
+                                int* CDP_y,
+                                int* yline,
+                                int* xline,
+                                int* group_x,
+                                int* group_y,
+                                int* shot_point,
+                                int* offset,
+                                int* trace_id,
+                                int* in_line,
+                                int* x_line)
+{
+    int tr_num;
+    for (int loc_tr_num = 0; loc_tr_num < tr_count; loc_tr_num++) {
+        tr_num = start+loc_tr_num;
+        read_trace(trbuf + loc_tr_num * samnr,tr_num,loc_tr_num,source_x,source_y,CDP_x,CDP_y,yline,xline,group_x,group_y,shot_point,offset,trace_id,in_line,x_line);
+    }
+}
+
+Seismogramm* SeismicData::getSeismogramm(int in_line,int x_line){
+
+    Seismogramm *seis;
+    char traceh[SEGY_TRACE_HEADER_SIZE];
+    bool pos_str =true;
+    int iln,xln;
+    int start = 0,stop;
+    for(int loc_tr_num = 0; loc_tr_num < numtrh; loc_tr_num++){
+        int err = segy_traceheader(fp, loc_tr_num, traceh, trace0, trace_bsize);
+        err = segy_get_field(traceh, SEGY_TR_INLINE, &iln);
+        err = segy_get_field(traceh, SEGY_TR_CROSSLINE, &xln);
+        if(iln == in_line && xln == x_line){
+            stop = loc_tr_num;
+            if(pos_str){
+                pos_str = false;
+                start = loc_tr_num;
+            }
+        }
+    }
+    auto * trbuf = new float[(stop - start) * trace_bsize];
+    int* source_x= new int[stop-start]{1};
+    int* source_y =new int[stop-start]{1};
+    int* CDP_x =new int[stop-start]{1};
+    int* CDP_y =new int[stop-start]{1};
+    int* yline =new int[stop-start]{1};
+    int* xline =new int[stop-start]{1};
+    int* group_x =new int[stop-start]{1};
+    int* group_y =new int[stop-start]{1};
+    int* shot_point =new int[stop-start]{1};
+    int* offset =new int[stop-start]{1};
+    int* trace_id =new int[stop-start]{1};
+    int* tr_in_line =new int[stop-start];
+    int* tr_x_line =new int[stop-start];
+    process_block(trbuf,stop - start,start,source_x,source_y,CDP_x,CDP_y,yline,xline,group_x,group_y,shot_point,offset,trace_id,tr_in_line,tr_x_line);
+
+    seis = new Seismogramm(trbuf,source_x,source_y,CDP_x,CDP_y,yline,xline,group_x,group_y,shot_point,offset,trace_id,tr_in_line,tr_x_line);
+    return seis;
+
+}

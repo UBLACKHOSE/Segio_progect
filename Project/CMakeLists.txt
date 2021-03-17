@@ -34,8 +34,8 @@ set(PROJECT_SOURCES
         mainwindow.ui
         seismicdata.cpp
         seismicdata.h
-        segio_trace_info.cpp
-        segio_trace_info.h
+        seismogramm.cpp
+        seismogramm.h
 )
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)

@@ -3,11 +3,10 @@
 
 #include <iostream>
 #include "segyio/segy.h"
-#include "seismicdata.h"
 #include "QMap"
 #include "QtDebug"
 
-class Segio_trace_info
+class Seismogramm
 {
 private:
     float trbuf;
@@ -25,7 +24,7 @@ private:
     int* in_line;
     int* x_line;
 public:
-    Segio_trace_info();
+    Seismogramm(float*,int*,int*,int*,int*,int*,int*,int*,int*,int*,int*,int*,int*,int*);
 };
 
 #endif // SEGIO_TRACE_INFO_H

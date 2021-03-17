@@ -8,7 +8,6 @@
 #include <vector>
 #include "segyio\segy.h"
 #include "mainwindow.h"
-#include "seg.h"
 
 #include <QApplication>
 

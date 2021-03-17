@@ -12,7 +12,7 @@
 #include <vector>
 #include <QtWidgets>
 #include "seismicdata.h"
-#include "segio_trace_info.h"
+#include "seismogramm.h"
 
 MainWindow::MainWindow(QWidget *parent):QMainWindow(parent),ui(new Ui::MainWindow)
 {
@@ -83,6 +83,8 @@ void MainWindow::on_action_triggered()
 
     SeismicData *seg = new SeismicData(str);
 
+
+    Seismogramm *seis = seg->getSeismogramm(866,369);
     //Segio_trace_info *seg_info = new Segio_trace_info(*seg);
 
 //    seg->segy_get_otg(*seg_info);
@@ -220,6 +222,7 @@ void MainWindow::on_action_triggered()
 
 void MainWindow::on_pushButton_clicked()
 {
+
     qDebug() << test["source_x"]<< Qt::endl;;
     qDebug() << test["source_y"]<< Qt::endl;;
 }
