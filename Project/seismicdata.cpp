@@ -60,135 +60,6 @@ int SeismicData::segy_get_size(){
 }
 
 
-QMap<QString,int> SeismicData::get_trace_by_id(int id){
-    QMap<QString,int> seg_info;
-    char traceh[SEGY_TRACE_HEADER_SIZE];
-    //std::cout << "loc_tr_num" << loc_tr_num << std::endl;
-
-
-    int err = segy_traceheader(fp, id, traceh, trace0, trace_bsize);
-    if (err != 0) {
-        fprintf(stderr, "Unable to read trace %d\n", id);
-        std::exit(err);
-    }
-
-    int sample_count;
-    err = segy_get_field(traceh, SEGY_TR_SAMPLE_COUNT, &sample_count);
-    if (err != 0) {
-        fprintf(stderr, "Invalid trace header field: %d\n", SEGY_TR_SAMPLE_COUNT);
-        std::exit(err);
-    }
-
-    if (sample_count != samnr) {
-        fprintf(stderr, "Only fixed size traces are supperted\n");
-        std::exit(1);
-    }
-
-
-
-    int bufer;
-    err = segy_get_field(traceh, SEGY_TR_SOURCE_X, &bufer);
-    if (err != 0) {
-        fprintf(stderr, "Invalid trace header field: %d\n", SEGY_TR_SOURCE_X);
-        std::exit(err);
-    }
-    seg_info.insert("source_x",bufer);
-
-
-    err = segy_get_field(traceh, SEGY_TR_SOURCE_Y, &bufer);
-    if (err != 0) {
-        fprintf(stderr, "Invalid trace header field: %d\n", SEGY_TR_SOURCE_X);
-        std::exit(err);
-    }
-    seg_info.insert("source_y",bufer);
-
-
-    err = segy_get_field(traceh, SEGY_TR_CROSSLINE, &bufer);
-
-    if (err != 0) {
-        fprintf(stderr, "Invalid trace header field: %d\n", SEGY_TR_SOURCE_X);
-        std::exit(err);
-    }
-
-    seg_info.insert("xline",bufer);
-
-    err = segy_get_field(traceh, SEGY_TR_INLINE, &bufer);
-
-    if (err != 0) {
-        fprintf(stderr, "Invalid trace header field: %d\n", SEGY_TR_SOURCE_Y);
-        std::exit(err);
-    }
-
-    seg_info.insert("yline",bufer);
-
-    err = segy_get_field(traceh, SEGY_TR_CDP_X, &bufer);
-
-    if (err != 0) {
-        fprintf(stderr, "Invalid trace header field: %d\n", SEGY_TR_CDP_X);
-        std::exit(err);
-    }
-
-    seg_info.insert("CDP_x",bufer);
-
-    err = segy_get_field(traceh, SEGY_TR_CDP_Y, &bufer);
-
-    if (err != 0) {
-        fprintf(stderr, "Invalid trace header field: %d\n", SEGY_TR_CDP_Y);
-        std::exit(err);
-    }
-
-    seg_info.insert("CDP_y",bufer);
-
-    err = segy_get_field(traceh, SEGY_TR_GROUP_X, &bufer);
-
-    if (err != 0) {
-        fprintf(stderr, "Invalid trace header field: %d\n", SEGY_TR_GROUP_X);
-        std::exit(err);
-    }
-
-    seg_info.insert("group_x",bufer);
-
-    err = segy_get_field(traceh, SEGY_TR_GROUP_Y, &bufer);
-
-    if (err != 0) {
-        fprintf(stderr, "Invalid trace header field: %d\n", SEGY_TR_GROUP_Y);
-        std::exit(err);
-    }
-
-    seg_info.insert("group_y",bufer);
-
-    err = segy_get_field(traceh, SEGY_TR_SHOT_POINT, &bufer);
-
-    if (err != 0) {
-        fprintf(stderr, "Invalid trace header field: %d\n", SEGY_TR_SHOT_POINT);
-        std::exit(err);
-    }
-
-    seg_info.insert("shot_point",bufer);
-
-    err = segy_get_field(traceh, SEGY_TR_OFFSET, &bufer);
-
-    if (err != 0) {
-        fprintf(stderr, "Invalid trace header field: %d\n", SEGY_TR_OFFSET);
-        std::exit(err);
-    }
-
-    seg_info.insert("offset",bufer);
-
-    err = segy_get_field(traceh, SEGY_TR_SEQ_FILE, &bufer);
-
-    if (err != 0) {
-        fprintf(stderr, "Invalid trace header field: %d\n", SEGY_TR_SEQ_FILE);
-        std::exit(err);
-    }
-
-    seg_info.insert("trace_id",bufer);
-
-
-
-    return seg_info;
-}
-
 
 
 void SeismicData::read_trace(float* trbuf,int tr_num,int loc_tr_num,
@@ -346,6 +217,7 @@ void SeismicData::read_trace(float* trbuf,int tr_num,int loc_tr_num,
     }
 }
 
+
 void SeismicData::process_block(float* trbuf,int tr_count,int start,
                                 int* source_x,
                                 int* source_y,
@@ -362,11 +234,41 @@ void SeismicData::process_block(float* trbuf,int tr_count,int start,
                                 int* x_line)
 {
     int tr_num;
+
     for (int loc_tr_num = 0; loc_tr_num < tr_count; loc_tr_num++) {
         tr_num = start+loc_tr_num;
         read_trace(trbuf + loc_tr_num * samnr,tr_num,loc_tr_num,source_x,source_y,CDP_x,CDP_y,yline,xline,group_x,group_y,shot_point,offset,trace_id,in_line,x_line);
     }
 }
+
+
+
+void SeismicData::get__all_inline_and_xline(int* in_line, int* x_line){
+    char traceh[SEGY_TRACE_HEADER_SIZE];
+    for (int tr_num = 0; tr_num < numtrh; tr_num++) {
+        int err = segy_traceheader(fp, tr_num, traceh, trace0, trace_bsize);
+        err = segy_get_field(traceh, SEGY_TR_INLINE, &in_line[tr_num]);
+        err = segy_get_field(traceh, SEGY_TR_CROSSLINE, &x_line[tr_num]);
+    }
+}
+
+
+std::vector<int> SeismicData::in_and_x_line(int* x_line,int* in_line){
+    std::vector<int> trace;
+    trace.push_back(0);
+    int prev_xline = x_line[0], prev_inline = in_line[0];
+    for (int loc_tr_num = 0; loc_tr_num < numtrh; loc_tr_num++) {
+        if (in_line[loc_tr_num]!= prev_inline || x_line[loc_tr_num]!= prev_xline) {
+            prev_inline = in_line[loc_tr_num];
+            prev_xline = x_line[loc_tr_num];
+            trace.push_back(loc_tr_num);
+            qDebug() << loc_tr_num << ' ' << in_line[loc_tr_num] << ' ' << x_line[loc_tr_num] << endl;
+        }
+    }
+
+    return trace;
+}
+
 
 Seismogramm* SeismicData::getSeismogramm(int in_line,int x_line){
 
@@ -374,19 +276,20 @@ Seismogramm* SeismicData::getSeismogramm(int in_line,int x_line){
     char traceh[SEGY_TRACE_HEADER_SIZE];
     bool pos_str =true;
     int iln,xln;
-    int start = 0,stop;
-    for(int loc_tr_num = 0; loc_tr_num < numtrh; loc_tr_num++){
-        int err = segy_traceheader(fp, loc_tr_num, traceh, trace0, trace_bsize);
-        err = segy_get_field(traceh, SEGY_TR_INLINE, &iln);
-        err = segy_get_field(traceh, SEGY_TR_CROSSLINE, &xln);
-        if(iln == in_line && xln == x_line){
-            stop = loc_tr_num;
-            if(pos_str){
-                pos_str = false;
-                start = loc_tr_num;
-            }
+    int start=0,stop=0;
+    int* tr_x_line = new int[numtrh];
+    int* tr_in_line = new int[numtrh];
+    get__all_inline_and_xline(tr_in_line,tr_x_line);
+    std::vector<int> traces_count = in_and_x_line(tr_x_line,tr_in_line);
+
+    for(int i=0; i < traces_count.size()-1;i++)
+    {
+        if(tr_x_line[traces_count[i]]==x_line &&tr_in_line[traces_count[i]]==in_line){
+            stop = traces_count[i+1];
+            start = traces_count[i];
         }
     }
+
     auto * trbuf = new float[(stop - start) * trace_bsize];
     int* source_x= new int[stop-start]{1};
     int* source_y =new int[stop-start]{1};
@@ -399,11 +302,10 @@ Seismogramm* SeismicData::getSeismogramm(int in_line,int x_line){
     int* shot_point =new int[stop-start]{1};
     int* offset =new int[stop-start]{1};
     int* trace_id =new int[stop-start]{1};
-    int* tr_in_line =new int[stop-start];
-    int* tr_x_line =new int[stop-start];
-    process_block(trbuf,stop - start,start,source_x,source_y,CDP_x,CDP_y,yline,xline,group_x,group_y,shot_point,offset,trace_id,tr_in_line,tr_x_line);
-
-    seis = new Seismogramm(trbuf,source_x,source_y,CDP_x,CDP_y,yline,xline,group_x,group_y,shot_point,offset,trace_id,tr_in_line,tr_x_line);
+    int* tr_2_in_line =new int[stop-start];
+    int* tr_2_x_line =new int[stop-start];
+    process_block(trbuf,stop - start,start,source_x,source_y,CDP_x,CDP_y,yline,xline,group_x,group_y,shot_point,offset,trace_id,tr_2_in_line,tr_2_x_line);
+    seis = new Seismogramm(trbuf,source_x,source_y,CDP_x,CDP_y,yline,xline,group_x,group_y,shot_point,offset,trace_id,tr_2_in_line,tr_2_x_line);
     return seis;
 
 }

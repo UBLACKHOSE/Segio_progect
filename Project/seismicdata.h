@@ -13,6 +13,7 @@
 #include <numeric>
 #include <cmath>
 #include <memory>
+#include <vector>
 
 class SeismicData
 {
@@ -27,16 +28,16 @@ private:
     long trace0;
     int block_size;
     int numtrh;
-    void read_trace(float* trbuf,int tr_num,int loc_tr_num,int*,int*,int*,int*,int*,int*,int*,int*,int*,int*,int*,int*,int*);
-    void process_block(float* trbuf,int tr_count,int start,int*,int*,int*,int*,int*,int*,int*,int*,int*,int*,int*,int*,int*);
 public:
-
     SeismicData(QString Path);
 public:
-    QMap<QString,int> get_trace_by_id(int id);
     int segy_get_size();
     Seismogramm* getSeismogramm(int,int);
 private:
+        std::vector<int> in_and_x_line(int*,int*);
+        void get__all_inline_and_xline(int*,int*);
+        void read_trace(float* trbuf,int tr_num,int loc_tr_num,int*,int*,int*,int*,int*,int*,int*,int*,int*,int*,int*,int*,int*);
+        void process_block(float* trbuf,int tr_count,int start,int*,int*,int*,int*,int*,int*,int*,int*,int*,int*,int*,int*,int*);
 
 };
 
