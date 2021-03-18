@@ -85,6 +85,8 @@ void MainWindow::on_action_triggered()
 
 
     Seismogramm *seis = seg->getSeismogramm(866,369);
+
+    QtCharts::QLineSeries *series = seis->get_series();
     //Segio_trace_info *seg_info = new Segio_trace_info(*seg);
 
 //    seg->segy_get_otg(*seg_info);

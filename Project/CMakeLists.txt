@@ -36,6 +36,10 @@ set(PROJECT_SOURCES
         seismicdata.h
         seismogramm.cpp
         seismogramm.h
+        chart.cpp
+        chartview.cpp
+        chart.h
+        chartview.h
 )
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
@@ -59,3 +63,8 @@ target_link_libraries(Project PRIVATE Qt${QT_VERSION_MAJOR}::Widgets)
 
 find_package(segyio  REQUIRED)
 target_link_libraries(Project PRIVATE segyio::segyio )
+
+
+# include other modules above
+find_package(Qt5Charts)
+target_link_libraries(Project PRIVATE Qt5::Widgets Qt5::Charts)

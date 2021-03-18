@@ -8,8 +8,8 @@
 #include <vector>
 #include "segyio\segy.h"
 #include "mainwindow.h"
-
-#include <QApplication>
+#include <QtWidgets/QApplication>
+#include <QtWidgets/QMainWindow>
 
 int main(int argc, char *argv[])
 {
