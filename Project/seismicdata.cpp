@@ -1,5 +1,6 @@
 #include "seismicdata.h"
 #include <iostream>
+#include "seismogramm.h"
 
 SeismicData::SeismicData(QString Path)
 {
@@ -262,7 +263,6 @@ std::vector<int> SeismicData::in_and_x_line(int* x_line,int* in_line){
             prev_inline = in_line[loc_tr_num];
             prev_xline = x_line[loc_tr_num];
             trace.push_back(loc_tr_num);
-            qDebug() << loc_tr_num << ' ' << in_line[loc_tr_num] << ' ' << x_line[loc_tr_num] << endl;
         }
     }
 
@@ -289,23 +289,47 @@ Seismogramm* SeismicData::getSeismogramm(int in_line,int x_line){
             start = traces_count[i];
         }
     }
+    if(start == 0 && stop==0){
+        QMessageBox msgBox;
+        msgBox.setText("Неверно введены xline и crossline");
+        msgBox.setStyleSheet("QLabel {color: red;font-size:14px}");
+        msgBox.exec();
+        return NULL;
+    }
 
-    auto * trbuf = new float[(stop - start) * trace_bsize];
-    int* source_x= new int[stop-start]{1};
-    int* source_y =new int[stop-start]{1};
-    int* CDP_x =new int[stop-start]{1};
-    int* CDP_y =new int[stop-start]{1};
-    int* yline =new int[stop-start]{1};
-    int* xline =new int[stop-start]{1};
-    int* group_x =new int[stop-start]{1};
-    int* group_y =new int[stop-start]{1};
-    int* shot_point =new int[stop-start]{1};
-    int* offset =new int[stop-start]{1};
-    int* trace_id =new int[stop-start]{1};
+
+    int size = stop - start;
+    auto * trbuf = new float[(stop - start) * samnr];
+    int* source_x= new int[stop-start];
+    int* source_y =new int[stop-start];
+    int* CDP_x =new int[stop-start];
+    int* CDP_y =new int[stop-start];
+    int* yline =new int[stop-start];
+    int* xline =new int[stop-start];
+    int* group_x =new int[stop-start];
+    int* group_y =new int[stop-start];
+    int* shot_point =new int[stop-start];
+    int* offset =new int[stop-start];
+    int* trace_id =new int[stop-start];
     int* tr_2_in_line =new int[stop-start];
     int* tr_2_x_line =new int[stop-start];
     process_block(trbuf,stop - start,start,source_x,source_y,CDP_x,CDP_y,yline,xline,group_x,group_y,shot_point,offset,trace_id,tr_2_in_line,tr_2_x_line);
-    seis = new Seismogramm(trbuf,source_x,source_y,CDP_x,CDP_y,yline,xline,group_x,group_y,shot_point,offset,trace_id,tr_2_in_line,tr_2_x_line);
+    float fallback =0;
+    float dt;
+
+
+
+
+    int err = segy_sample_interval(fp,fallback,&dt);
+
+    if (err != 0) {
+        QMessageBox msgBox;
+        msgBox.setText("sample_interval");
+        msgBox.exec();
+        std::exit(err);
+    }
+
+    seis = new Seismogramm(trbuf,source_x,source_y,CDP_x,CDP_y,yline,xline,group_x,group_y,shot_point,offset,trace_id,tr_2_in_line,tr_2_x_line,samnr,dt,size);
     return seis;
 
 }

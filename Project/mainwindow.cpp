@@ -29,10 +29,10 @@ void MainWindow::on_action_triggered()
 {
     QString str = QFileDialog::getOpenFileName(0, "Open Dialog", "", "*.sgy").toStdString().c_str();
     if(!str.isEmpty()){
-    SeismicData *seg = new SeismicData(str);
-    Seismogramm *seis = seg->getSeismogramm(866,369);
+        SeismicData *seg = new SeismicData(str);
+        Seismogramm *seis = seg->getSeismogramm(866,368);
+        qDebug()<< "this max:"<<seis->getMaxValue();
     }
-    //QtCharts::QLineSeries *series = seis->get_series();
 }
 
 void MainWindow::on_pushButton_clicked()

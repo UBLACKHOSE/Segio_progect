@@ -36,10 +36,12 @@ set(PROJECT_SOURCES
         seismicdata.h
         seismogramm.cpp
         seismogramm.h
-        chart.cpp
-        chartview.cpp
-        chart.h
-        chartview.h
+        graphiccontroller.h
+        graphiccontroller.cpp
+#        chart.cpp
+#        chartview.cpp
+#        chart.h
+#        chartview.h
 )
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)

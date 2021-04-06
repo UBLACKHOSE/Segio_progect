@@ -32,9 +32,17 @@ private:
     int* trace_id;
     int* in_line;
     int* x_line;
+    int samnr;
+    float dt;
+    int size;
 public:
-    Seismogramm(float*,int*,int*,int*,int*,int*,int*,int*,int*,int*,int*,int*,int*,int*);
-    QtCharts::QLineSeries *get_series();
+    Seismogramm(float*,int*,int*,int*,int*,int*,int*,int*,int*,int*,int*,int*,int*,int*,int,float,int);
+
+    int getSampleInterval();
+    int getTracesSize();
+    float* getTraces(int);
+    float getMaxValue();
+    int getBufferSize();
 };
 
 #endif // SEGIO_TRACE_INFO_H

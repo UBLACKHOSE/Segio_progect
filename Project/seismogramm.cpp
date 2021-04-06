@@ -12,7 +12,9 @@ int* tr_shot_point,
 int* tr_offset,
 int* tr_trace_id,
 int* tr_in_line,
-int* tr_x_line)
+int* tr_x_line,
+int tr_samnr,
+float tr_fallback,int tr_size)
 {
     source_x = tr_source_x;
     source_y = tr_source_y;
@@ -28,16 +30,38 @@ int* tr_x_line)
     in_line = tr_in_line;
     x_line = tr_x_line;
     trbuf = buf;
+    samnr = tr_samnr;
+    dt = tr_fallback;
+    size = tr_size;
 }
 
-QtCharts::QLineSeries *Seismogramm::get_series(){
-    QtCharts::QLineSeries *series = new QtCharts::QLineSeries();
-    for (int i = 0; i < 500; i++) {
-        QPointF p((qreal) i, qSin(M_PI / 50 * i) * 100);
-        p.ry() += QRandomGenerator::global()->bounded(20);
-        *series << p;
+int Seismogramm::getSampleInterval(){
+    return dt;
+}
+
+int Seismogramm::getTracesSize(){
+    return size;
+}
+
+
+float* Seismogramm::getTraces(int j){
+    return trbuf;
+}
+
+int Seismogramm::getBufferSize(){
+    return samnr;
+}
+
+
+float Seismogramm::getMaxValue(){
+
+    float max = -100;
+    for(int i =0;i<=size; i++){
+        if(trbuf[i] > max){
+            max = trbuf[i];
+        }
     }
-    return series;
+    return max;
 }
 
 
