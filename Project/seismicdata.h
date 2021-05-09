@@ -14,6 +14,7 @@
 #include <cmath>
 #include <memory>
 #include <vector>
+#include <QtCharts>
 
 class SeismicData
 {
@@ -33,8 +34,17 @@ public:
 public:
     int segy_get_size();
     Seismogramm* getSeismogramm(int,int);
+    QStringList getInlineList();
+    QStringList getXlineList(int);
+
+    QChart* getScatterSeries();
 private:
         std::vector<int> in_and_x_line(int*,int*);
+        std::vector<int> getInline(int*);
+        std::vector<int> getXline(int*,int,int*);
+
+
+
         void get__all_inline_and_xline(int*,int*);
         void read_trace(float* trbuf,int tr_num,int loc_tr_num,int*,int*,int*,int*,int*,int*,int*,int*,int*,int*,int*,int*,int*);
         void process_block(float* trbuf,int tr_count,int start,int*,int*,int*,int*,int*,int*,int*,int*,int*,int*,int*,int*,int*);

@@ -81,7 +81,6 @@ void SeismicData::read_trace(float* trbuf,int tr_num,int loc_tr_num,
     char traceh[SEGY_TRACE_HEADER_SIZE];
     //std::cout << "loc_tr_num" << loc_tr_num << std::endl;
 
-
     int err = segy_traceheader(fp, tr_num, traceh, trace0, trace_bsize);
     if (err != 0) {
         QMessageBox msgBox;
@@ -332,4 +331,104 @@ Seismogramm* SeismicData::getSeismogramm(int in_line,int x_line){
     seis = new Seismogramm(trbuf,source_x,source_y,CDP_x,CDP_y,yline,xline,group_x,group_y,shot_point,offset,trace_id,tr_2_in_line,tr_2_x_line,samnr,dt,size);
     return seis;
 
+}
+
+std::vector<int> SeismicData::getInline(int* in_line){
+    std::vector<int> trace;
+    int prev_inline = in_line[0];
+    for (int loc_tr_num = 0; loc_tr_num < numtrh; loc_tr_num++) {
+
+        if (in_line[loc_tr_num]!= prev_inline ) {
+            trace.push_back(prev_inline);
+            prev_inline = in_line[loc_tr_num];
+        }
+
+    }
+
+    return trace;
+}
+
+
+QStringList SeismicData::getInlineList(){
+    QStringList inlines;
+
+    int* tr_x_line = new int[numtrh];
+    int* tr_in_line = new int[numtrh];
+    get__all_inline_and_xline(tr_in_line,tr_x_line);
+    std::vector<int> traces_in = getInline(tr_in_line);
+
+    for(int i=0; i < traces_in.size()-1;i++)
+    {
+        inlines.append(QString::number(traces_in[i]));
+    }
+
+
+
+
+    return inlines;
+}
+
+std::vector<int> SeismicData::getXline(int* x_line,int in_linel,int* in_line){
+    std::vector<int> trace;
+    int prev_xline = x_line[0];
+    int prev_inline = in_line[0];
+
+    for (int loc_tr_num = 0; loc_tr_num < numtrh; loc_tr_num++) {
+        if (in_line[loc_tr_num]== in_linel && x_line[loc_tr_num]!=prev_xline) {
+            trace.push_back(prev_xline);
+            prev_xline = x_line[loc_tr_num];
+        }
+
+    }
+
+    return trace;
+}
+
+
+QStringList SeismicData::getXlineList(int in_line){
+    QStringList xlines;
+
+    int* tr_x_line = new int[numtrh];
+    int* tr_in_line = new int[numtrh];
+    get__all_inline_and_xline(tr_in_line,tr_x_line);
+    std::vector<int> traces_in = getXline(tr_x_line,in_line,tr_in_line);
+
+    for(int i=0; i < traces_in.size()-1;i++)
+    {
+        xlines.append(QString::number(traces_in[i]));
+    }
+
+
+
+
+    return xlines;
+}
+
+
+QChart* SeismicData::getScatterSeries(){
+
+    QChart* chart = new QChart();
+    int* tr_x_line = new int[numtrh];
+    int* tr_in_line = new int[numtrh];
+    get__all_inline_and_xline(tr_in_line,tr_x_line);
+    std::vector<int> traces_count = in_and_x_line(tr_x_line,tr_in_line);
+    for(int i=0; i < traces_count.size()-1;i++)
+    {
+        QScatterSeries *series = new QScatterSeries();
+        series->append(tr_in_line[traces_count[i]],tr_x_line[traces_count[i]]);
+        series->setMarkerSize((traces_count[i+1]-traces_count[i])/10);
+        series->setMarkerShape(QScatterSeries::MarkerShapeCircle);
+        series->setColor(QColor(QRgb(0x0a16fa)));
+        chart->addSeries(series);
+    }
+
+
+    chart->setAnimationOptions(QChart::SeriesAnimations);
+    chart->legend()->hide();
+    chart->createDefaultAxes();
+    chart->axisX()->setTitleVisible(true);
+    chart->axisX()->setTitleText("INLINE");
+    chart->axisY()->setTitleVisible(true);
+    chart->axisY()->setTitleText("CROSSLINE");
+    return chart;
 }

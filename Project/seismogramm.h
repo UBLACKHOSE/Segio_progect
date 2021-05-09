@@ -3,8 +3,6 @@
 
 #include <iostream>
 #include "segyio/segy.h"
-#include "chart.h"
-#include "chartview.h"
 #include "QMap"
 #include "QtDebug"
 #include <QtWidgets/QApplication>
@@ -14,6 +12,7 @@
 #include <QtCore/QRandomGenerator>
 #include <QtCharts/QChart>
 #include "QGroupBox"
+
 
 class Seismogramm
 {
@@ -43,6 +42,7 @@ public:
     float* getTraces(int);
     float getMaxValue();
     int getBufferSize();
+
 };
 
 #endif // SEGIO_TRACE_INFO_H

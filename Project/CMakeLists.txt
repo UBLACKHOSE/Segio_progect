@@ -38,6 +38,10 @@ set(PROJECT_SOURCES
         seismogramm.h
         graphiccontroller.h
         graphiccontroller.cpp
+        graphview.cpp
+        graphview.h
+        chart.cpp
+        chart.h
 #        chart.cpp
 #        chartview.cpp
 #        chart.h

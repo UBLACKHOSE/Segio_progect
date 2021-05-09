@@ -55,10 +55,12 @@ int Seismogramm::getBufferSize(){
 
 float Seismogramm::getMaxValue(){
 
-    float max = -100;
+    float max = -10000;
     for(int i =0;i<=size; i++){
-        if(trbuf[i] > max){
-            max = trbuf[i];
+        if(trbuf[i] > 0 && trbuf[i] > max){
+                max = trbuf[i];
+        }else if(-trbuf[i] > max){
+            max = -trbuf[i];
         }
     }
     return max;

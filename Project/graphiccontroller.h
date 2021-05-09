@@ -3,11 +3,12 @@
 #include <QPainter>
 #include <QPixmap>
 
-#include "chartgesture.h"
-#include "data/seismevent.h"
-#include "event_view/graphic_view.h"
-#include "seismogramm.h"
+//#include "chartgesture.h"
+//#include "event_view/graphic_view.h"
+#include "chart.h"
 
+#include "seismogramm.h"
+#include "seismicdata.h"
 #include <QtCharts>
 
 namespace Data {
@@ -28,12 +29,14 @@ class GraphicController : public QFrame {
 public:
   explicit GraphicController(QWidget *parent = nullptr);
 
-  ChartGesture *getModel() const { return _chart; }
-  void setChart(ChartGesture *chart) { _chart = chart; }
-  void setView(GraphicView *view) { _view = view; }
+//  ChartGesture *getModel() const { return _chart; }
+//  void setChart(ChartGesture *chart) { _chart = chart; }
+//  void setView(GraphicView *view) { _view = view; }
 
-  void draw(Seismogramm*);
+  Chart* draw(Seismogramm*,int,float g);
 
+
+  QLineSeries* getTrace(Seismogramm* ,int,QPen);
   void updateEventName(const QString &);
   void setGainCoefficient(const float gainCoefficient);
   void setClippingValue(const float clippingValue);
@@ -42,8 +45,8 @@ public:
   void clear();
 
 private:
-  //  QWidget *_allView;
-  GraphicView *_view;
+  QWidget *_allView;
+  QChartView *_view;
   Data::SeismEvent const *_event;
 
   float _norm;
@@ -56,8 +59,7 @@ private:
 
 
 
-  ChartGesture *_chart;
-
+  QChart *_chart;
 
   QValueAxis *_axisX = new QValueAxis;
   QValueAxis *_axisY = new QValueAxis;
@@ -88,7 +90,7 @@ signals:
 
 
 private:
-  void addTraceSeries(Seismogramm*);
+  void addTraceSeries(Seismogramm*,int);
   void addWiggle(bool t); // true is positive, false is negative
   void settingAreaSeries(QAreaSeries *series);
   void setAxesY(int);

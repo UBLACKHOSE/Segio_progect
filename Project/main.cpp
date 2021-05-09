@@ -10,6 +10,7 @@
 #include "mainwindow.h"
 #include <QtWidgets/QApplication>
 #include <QtWidgets/QMainWindow>
+#include "graphview.h"
 
 int main(int argc, char *argv[])
 {
